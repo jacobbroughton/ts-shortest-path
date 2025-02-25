@@ -5,7 +5,7 @@ gridElement.style.backgroundColor = "grey";
 gridElement.style.position = "relative";
 
 const maxDimensions: [number, number] = [10, 10];
-let currCoords: [number, number] = [0, 0];
+const currCoords: [number, number] = [0, 0];
 let currAxisIndex: 0 | 1 = 0; // 0 = x, 1 = y
 let running = true;
 
@@ -44,5 +44,3 @@ while (running) {
 
   if (currCoords[0] === 0 && currCoords[1] < maxDimensions[1]) currAxisIndex = 0;
 }
-
-console.log("Grid finished");
