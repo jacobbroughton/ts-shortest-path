@@ -8,6 +8,12 @@ const maxDimensions: [number, number] = [10, 10];
 const currCoords: [number, number] = [0, 0];
 let currAxisIndex: 0 | 1 = 0; // 0 = x, 1 = y
 let running = true;
+const targetCoords = [
+  Math.floor(Math.random() * maxDimensions[0]),
+  Math.floor(Math.random() * maxDimensions[1]),
+];
+
+console.log(targetCoords);
 
 // render grid
 while (running) {
@@ -21,7 +27,10 @@ while (running) {
 
   nodeElement.title = `[${currCoords[0]}, ${currCoords[1]}]`;
   nodeElement.style.position = "absolute";
-  nodeElement.style.backgroundColor = "green";
+  nodeElement.style.backgroundColor =
+    targetCoords[0] === currCoords[0] && targetCoords[1] === currCoords[1]
+      ? "orange"
+      : "green";
   nodeElement.style.border = "1px solid lightgreen";
   nodeElement.style.width = "28px";
   nodeElement.style.height = "28px";
