@@ -7,10 +7,12 @@ const maxDimensions = [10, 10];
 const currCoords = [0, 0];
 let currAxisIndex = 0; // 0 = x, 1 = y
 let running = true;
+let needsRefresh = false;
 const targetCoords = [
     Math.floor(Math.random() * maxDimensions[0]),
     Math.floor(Math.random() * maxDimensions[1]),
 ];
+let selectedCoords = [null, null];
 console.log(targetCoords);
 // render grid
 while (running) {
@@ -19,7 +21,7 @@ while (running) {
         running = false;
         break;
     }
-    const nodeElement = document.createElement("div");
+    const nodeElement = document.createElement("button");
     nodeElement.title = `[${currCoords[0]}, ${currCoords[1]}]`;
     nodeElement.style.position = "absolute";
     nodeElement.style.backgroundColor =
@@ -31,6 +33,20 @@ while (running) {
     nodeElement.style.height = "28px";
     nodeElement.style.marginLeft = `${currCoords[0] * 10 || 0}%`;
     nodeElement.style.marginTop = `${currCoords[1] * 10 || 0}%`;
+    nodeElement.dataset.coordX = `${currCoords[0]}`;
+    nodeElement.dataset.coordY = `${currCoords[1]}`;
+    nodeElement.addEventListener("click", (e) => {
+        const el = e.target;
+        const clickedCoords = [parseInt(el.dataset.coordX), parseInt(el.dataset.coordY)];
+        console.log(clickedCoords, targetCoords);
+        if (clickedCoords[0] === targetCoords[0] && clickedCoords[1] === targetCoords[1])
+            return;
+        nodeElement.style.backgroundColor = "blue";
+        selectedCoords[0] = clickedCoords[0];
+        selectedCoords[1] = clickedCoords[1];
+        needsRefresh = true;
+        refreshGrid();
+    });
     gridElement.appendChild(nodeElement);
     // max x reached, focus on y axis and reset x coord to 0
     if (currAxisIndex === 0 &&
@@ -42,6 +58,35 @@ while (running) {
     currCoords[currAxisIndex] += 1;
     if (currCoords[0] === 0 && currCoords[1] < maxDimensions[1])
         currAxisIndex = 0;
+}
+function refreshGrid() {
+    console.log("we up");
+    const refreshCoords = [0, 0];
+    let currRefreshAxisIndex = 0;
+    while (needsRefresh) {
+        console.log(refreshCoords);
+        if (currRefreshAxisIndex === 1 &&
+            refreshCoords[currRefreshAxisIndex] >= maxDimensions[currRefreshAxisIndex]) {
+            needsRefresh = false;
+            break;
+        }
+        const nodeElement = document.querySelector(`[data-coord-x="${refreshCoords[0]}"][data-coord-y="${refreshCoords[1]}"]`);
+        if (!(refreshCoords[0] === selectedCoords[0] && refreshCoords[1] === selectedCoords[1]) &&
+            !(refreshCoords[0] === targetCoords[0] && refreshCoords[1] === targetCoords[1])) {
+            nodeElement.style.backgroundColor = "green";
+        }
+        console.log("selected", selectedCoords);
+        // max x reached, focus on y axis and reset x coord to 0
+        if (currRefreshAxisIndex === 0 &&
+            refreshCoords[currRefreshAxisIndex] === maxDimensions[currRefreshAxisIndex] - 1) {
+            currRefreshAxisIndex = 1;
+            refreshCoords[0] = 0;
+        }
+        // increment coord on current axis
+        refreshCoords[currRefreshAxisIndex] += 1;
+        if (refreshCoords[0] === 0 && refreshCoords[1] < maxDimensions[1])
+            currRefreshAxisIndex = 0;
+    }
 }
 export {};
 //# sourceMappingURL=index.js.map
