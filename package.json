@@ -1,0 +1,21 @@
+{
+  "name": "ts-shortest-path",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Grid generates with random target spot -> user clicks a diff spot on grid -> shortest path calculates",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsc && node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacobbroughton/ts-shortest-path.git"
+  },
+  "author": "Jacob Broughton",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jacobbroughton/ts-shortest-path/issues"
+  },
+  "homepage": "https://github.com/jacobbroughton/ts-shortest-path#readme"
+}
