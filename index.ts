@@ -76,7 +76,6 @@ while (running) {
 }
 
 function refreshGrid() {
-  console.log("we up");
   const refreshCoords: [number, number] = [0, 0];
   let currRefreshAxisIndex: 0 | 1 = 0;
 
@@ -103,7 +102,6 @@ function refreshGrid() {
       nodeElement.style.backgroundColor = "green";
     }
 
-    console.log("selected", selectedCoords);
     // max x reached, focus on y axis and reset x coord to 0
     if (
       currRefreshAxisIndex === 0 &&
