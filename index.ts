@@ -15,8 +15,6 @@ const targetCoords = [
 ];
 let selectedCoords: [number | null, number | null] = [null, null];
 
-console.log(targetCoords);
-
 // render grid
 while (running) {
   // both limits are reached, exit loop
@@ -44,7 +42,6 @@ while (running) {
   nodeElement.addEventListener("click", (e: MouseEvent) => {
     const el = e.target as HTMLButtonElement;
     const clickedCoords = [parseInt(el.dataset.coordX!), parseInt(el.dataset.coordY!)];
-    console.log(clickedCoords, targetCoords);
 
     if (clickedCoords[0] === targetCoords[0] && clickedCoords[1] === targetCoords[1])
       return;
@@ -79,14 +76,82 @@ function refreshGrid() {
   const refreshCoords: [number, number] = [0, 0];
   let currRefreshAxisIndex: 0 | 1 = 0;
 
+  let runIndex = 0;
   while (needsRefresh) {
-    console.log(refreshCoords);
     if (
       currRefreshAxisIndex === 1 &&
       refreshCoords[currRefreshAxisIndex] >= maxDimensions[currRefreshAxisIndex]
     ) {
       needsRefresh = false;
       break;
+    }
+
+    // determine surrounding coordinates (above, bottom, left, right)
+    let aboveCoord = null;
+
+    if (refreshCoords[1] > 0) {
+      const aboveX = refreshCoords[0];
+      const aboveY = refreshCoords[1] - 1;
+      aboveCoord = [aboveX, aboveY];
+    }
+
+    let belowCoord = null;
+
+    if (refreshCoords[1] < maxDimensions[1] - 1) {
+      const belowX = refreshCoords[0];
+      const belowY = refreshCoords[1] + 1;
+      belowCoord = [belowX, belowY];
+    }
+
+    let leftCoord = null;
+
+    if (refreshCoords[0] > 0) {
+      const leftX = refreshCoords[0] - 1;
+      const leftY = refreshCoords[1];
+      leftCoord = [leftX, leftY];
+    }
+
+    let rightCoord = null;
+
+    if (refreshCoords[0] < maxDimensions[0] - 1) {
+      const rightX = refreshCoords[0] + 1;
+      const rightY = refreshCoords[1];
+      rightCoord = [rightX, rightY];
+    }
+
+    if (
+      refreshCoords[0] === selectedCoords[0] &&
+      refreshCoords[1] === selectedCoords[1]
+    ) {
+
+
+      // determine which closest (on the grid, not numerically)
+      const leftDiff = [leftCoord[0] - targetCoords[0], leftCoord[1] - targetCoords[1]];
+
+      const rightDiff = [
+        rightCoord[0] - targetCoords[0],
+        rightCoord[1] - targetCoords[1],
+      ];
+
+      const aboveDiff = [
+        aboveCoord[0] - targetCoords[0],
+        aboveCoord[1] - targetCoords[1],
+      ];
+
+      const belowDiff = [
+        belowCoord[0] - targetCoords[0],
+        belowCoord[1] - targetCoords[1],
+      ];
+
+      console.log(
+        `
+target: ${targetCoords.toString()}
+left: ${leftCoord?.toString()} - diff: ${leftDiff.toString()}
+right: ${rightCoord?.toString()} - diff: ${rightDiff.toString()}
+above: ${aboveCoord?.toString()} - diff: ${aboveDiff.toString()}
+below: ${belowCoord?.toString()} - diff: ${belowDiff.toString()}
+        `
+      );
     }
 
     const nodeElement = document.querySelector(
@@ -116,5 +181,7 @@ function refreshGrid() {
 
     if (refreshCoords[0] === 0 && refreshCoords[1] < maxDimensions[1])
       currRefreshAxisIndex = 0;
+
+    runIndex++;
   }
 }
