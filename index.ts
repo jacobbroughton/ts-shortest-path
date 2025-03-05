@@ -12,7 +12,8 @@ let needsRefresh = false;
 const targetCoords = [
   Math.floor(Math.random() * maxDimensions[0]),
   Math.floor(Math.random() * maxDimensions[1]),
-];
+]!;
+
 let selectedCoords: [number | null, number | null] = [null, null];
 
 // render grid
@@ -123,25 +124,29 @@ function refreshGrid() {
       refreshCoords[0] === selectedCoords[0] &&
       refreshCoords[1] === selectedCoords[1]
     ) {
-
-
       // determine which closest (on the grid, not numerically)
-      const leftDiff = [leftCoord[0] - targetCoords[0], leftCoord[1] - targetCoords[1]];
 
-      const rightDiff = [
-        rightCoord[0] - targetCoords[0],
-        rightCoord[1] - targetCoords[1],
-      ];
+      if (!targetCoords[0] || !targetCoords[1]) throw new Error("No target coordinates");
 
-      const aboveDiff = [
-        aboveCoord[0] - targetCoords[0],
-        aboveCoord[1] - targetCoords[1],
-      ];
+      let leftDiff = [0, 0];
 
-      const belowDiff = [
-        belowCoord[0] - targetCoords[0],
-        belowCoord[1] - targetCoords[1],
-      ];
+      if (leftCoord && leftCoord[0] && leftCoord[1])
+        leftDiff = [leftCoord[0] - targetCoords[0], leftCoord[1] - targetCoords[1]];
+
+      let rightDiff = [0, 0];
+
+      if (rightCoord && rightCoord[0] && rightCoord[1])
+        rightDiff = [rightCoord[0] - targetCoords[0], rightCoord[1] - targetCoords[1]];
+
+      let aboveDiff = [0, 0];
+
+      if (aboveCoord && aboveCoord[0] && aboveCoord[1])
+        aboveDiff = [aboveCoord[0] - targetCoords[0], aboveCoord[1] - targetCoords[1]];
+
+      let belowDiff = [0, 0];
+
+      if (belowCoord && belowCoord[0] && belowCoord[1])
+        belowDiff = [belowCoord[0] - targetCoords[0], belowCoord[1] - targetCoords[1]];
 
       console.log(
         `
