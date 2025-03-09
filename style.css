@@ -1,0 +1,33 @@
+button {
+  position: relative;
+  color: white;
+}
+
+button.left::before {
+  content: "L";
+  position: absolute;
+  z-index: 10;
+  left: 0;
+}
+
+
+button.right::before {
+  content: "R";
+  position: absolute;
+  z-index: 10;
+  left: 0;
+}
+
+button.above::before {
+  content: "A";
+  position: absolute;
+  z-index: 10;
+  left: 0;
+}
+
+button.below::before {
+  content: "B";
+  position: absolute;
+  z-index: 10;
+  left: 0;
+}
