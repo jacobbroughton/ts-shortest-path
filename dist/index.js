@@ -43,7 +43,8 @@ while (running) {
     nodeElement.addEventListener("click", (e) => {
         const el = e.target;
         selectedCoords = [parseInt(el.dataset.coordX), parseInt(el.dataset.coordY)];
-        if (!selectedCoords[0] || !selectedCoords[1]) {
+        console.log(selectedCoords);
+        if (selectedCoords[0] === null || selectedCoords[1] === null) {
             throw new Error("No selected coords found");
         }
         // determine surrounding coordinates (above, below, left, right)
@@ -53,25 +54,19 @@ while (running) {
             const aboveY = selectedCoords[1] - 1;
             aboveCoord = [aboveX, aboveY];
         }
-        if (
-        // selectedCoords[1] < maxDimensions[1] - 1 &&
-        selectedCoords[1] + 1 === selectedCoords[1] + 1 &&
+        if (selectedCoords[1] + 1 === selectedCoords[1] + 1 &&
             selectedCoords[0] === selectedCoords[0]) {
             const belowX = selectedCoords[0];
             const belowY = selectedCoords[1] + 1;
             belowCoord = [belowX, belowY];
         }
-        if (
-        // selectedCoords[0] > 0 &&
-        selectedCoords[0] - 1 === selectedCoords[0] - 1 &&
+        if (selectedCoords[0] - 1 === selectedCoords[0] - 1 &&
             selectedCoords[1] === selectedCoords[1]) {
             const leftX = selectedCoords[0] - 1;
             const leftY = selectedCoords[1];
             leftCoord = [leftX, leftY];
         }
-        if (
-        // selectedCoords[0] < maxDimensions[0] - 1 &&
-        selectedCoords[0] + 1 === selectedCoords[0] + 1 &&
+        if (selectedCoords[0] + 1 === selectedCoords[0] + 1 &&
             selectedCoords[1] === selectedCoords[1]) {
             const rightX = selectedCoords[0] + 1;
             const rightY = selectedCoords[1];
@@ -97,7 +92,6 @@ while (running) {
     currCoords[currAxisIndex] += 1;
     if (currCoords[0] === 0 && currCoords[1] < maxDimensions[1])
         currAxisIndex = 0;
-    console.log("outer loop running");
 }
 function refreshGrid() {
     const currentRefreshCoords = [0, 0];
@@ -115,7 +109,6 @@ function refreshGrid() {
             currentRefreshCoords[1] === selectedCoords[1];
         console.log("currentRefreshCoords", currentRefreshCoords, "selectedCoords", selectedCoords);
         if (isClickedSquare) {
-            console.log("ASDFASDFASDFASDFASDF");
             // determine which closest (on the grid, not numerically)
             if (targetCoords[0] === null || !targetCoords[1] === null)
                 throw new Error("Missing target coordinates");
@@ -164,6 +157,8 @@ function refreshGrid() {
             const isRightSquare = currentRefreshCoords[0] === rightCoord[0] &&
                 currentRefreshCoords[1] === rightCoord[1];
             if (isRightSquare) {
+                if (rightCoord[0] === targetCoords[0] && rightCoord[1] === targetCoords[1])
+                    return;
                 const rightNodeElement = document.querySelector(`[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`);
                 rightNodeElement.classList.add("right");
                 rightNodeElement.style.backgroundColor = "red";
@@ -173,6 +168,8 @@ function refreshGrid() {
             const isLeftSquare = currentRefreshCoords[0] === leftCoord[0] &&
                 currentRefreshCoords[1] === leftCoord[1];
             if (isLeftSquare) {
+                if (leftCoord[0] === targetCoords[0] && leftCoord[1] === targetCoords[1])
+                    return;
                 const leftNodeElement = document.querySelector(`[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`);
                 leftNodeElement.classList.add("left");
                 leftNodeElement.style.backgroundColor = "grey";
@@ -183,6 +180,8 @@ function refreshGrid() {
                 currentRefreshCoords[1] === aboveCoord[1];
             // console.log("currentRefreshCoords", currentRefreshCoords, "aboveCoord", aboveCoord)
             if (isAboveSquare) {
+                if (aboveCoord[0] === targetCoords[0] && aboveCoord[1] === targetCoords[1])
+                    return;
                 const aboveNodeElement = document.querySelector(`[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`);
                 aboveNodeElement.classList.add("above");
                 aboveNodeElement.style.backgroundColor = "lightblue";
@@ -192,6 +191,8 @@ function refreshGrid() {
             const isBelowSquare = currentRefreshCoords[0] === belowCoord[0] &&
                 currentRefreshCoords[1] === belowCoord[1];
             if (isBelowSquare) {
+                if (belowCoord[0] === targetCoords[0] && belowCoord[1] === targetCoords[1])
+                    return;
                 const belowNodeElement = document.querySelector(`[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`);
                 belowNodeElement.classList.add("below");
                 belowNodeElement.style.backgroundColor = "blue";

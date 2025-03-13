@@ -52,7 +52,7 @@ while (running) {
     const el = e.target as HTMLButtonElement;
     selectedCoords = [parseInt(el.dataset.coordX!), parseInt(el.dataset.coordY!)];
 
-    if (!selectedCoords[0] || !selectedCoords[1]) {
+    if (selectedCoords[0] === null || selectedCoords[1] === null) {
       throw new Error("No selected coords found");
     }
 
@@ -67,7 +67,6 @@ while (running) {
     }
 
     if (
-      // selectedCoords[1] < maxDimensions[1] - 1 &&
       selectedCoords[1] + 1 === selectedCoords[1] + 1 &&
       selectedCoords[0] === selectedCoords[0]
     ) {
@@ -77,7 +76,6 @@ while (running) {
     }
 
     if (
-      // selectedCoords[0] > 0 &&
       selectedCoords[0] - 1 === selectedCoords[0] - 1 &&
       selectedCoords[1] === selectedCoords[1]
     ) {
@@ -88,7 +86,6 @@ while (running) {
     }
 
     if (
-      // selectedCoords[0] < maxDimensions[0] - 1 &&
       selectedCoords[0] + 1 === selectedCoords[0] + 1 &&
       selectedCoords[1] === selectedCoords[1]
     ) {
@@ -125,8 +122,6 @@ while (running) {
   currCoords[currAxisIndex] += 1;
 
   if (currCoords[0] === 0 && currCoords[1] < maxDimensions[1]) currAxisIndex = 0;
-
-  console.log("outer loop running");
 }
 
 function refreshGrid() {
@@ -149,10 +144,14 @@ function refreshGrid() {
       currentRefreshCoords[0] === selectedCoords[0] &&
       currentRefreshCoords[1] === selectedCoords[1];
 
-      console.log("currentRefreshCoords", currentRefreshCoords, "selectedCoords", selectedCoords)
+    console.log(
+      "currentRefreshCoords",
+      currentRefreshCoords,
+      "selectedCoords",
+      selectedCoords
+    );
 
     if (isClickedSquare) {
-      console.log("ASDFASDFASDFASDFASDF")
       // determine which closest (on the grid, not numerically)
 
       if (targetCoords[0] === null || !targetCoords[1] === null)
@@ -190,7 +189,16 @@ function refreshGrid() {
         }
         belowDiff = [belowCoord[0] - targetCoords[0], belowCoord[1] - targetCoords[1]];
       }
-      console.log("leftDiff", leftDiff, "rightDiff", rightDiff,"aboveDiff", aboveDiff, "belowDiff", belowDiff)
+      console.log(
+        "leftDiff",
+        leftDiff,
+        "rightDiff",
+        rightDiff,
+        "aboveDiff",
+        aboveDiff,
+        "belowDiff",
+        belowDiff
+      );
     }
 
     const nodeElement = document.querySelector(
@@ -220,6 +228,8 @@ function refreshGrid() {
         currentRefreshCoords[1] === rightCoord[1];
 
       if (isRightSquare) {
+        if (rightCoord[0] === targetCoords[0] && rightCoord[1] === targetCoords[1])
+          return;
 
         const rightNodeElement = document.querySelector(
           `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
@@ -231,13 +241,14 @@ function refreshGrid() {
       }
     }
 
-
     if (leftCoord[0] !== null && leftCoord[1] !== null) {
       const isLeftSquare =
         currentRefreshCoords[0] === leftCoord[0] &&
         currentRefreshCoords[1] === leftCoord[1];
 
       if (isLeftSquare) {
+        if (leftCoord[0] === targetCoords[0] && leftCoord[1] === targetCoords[1]) return;
+
         const leftNodeElement = document.querySelector(
           `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
         ) as HTMLButtonElement;
@@ -256,6 +267,9 @@ function refreshGrid() {
       // console.log("currentRefreshCoords", currentRefreshCoords, "aboveCoord", aboveCoord)
 
       if (isAboveSquare) {
+        if (aboveCoord[0] === targetCoords[0] && aboveCoord[1] === targetCoords[1])
+          return;
+
         const aboveNodeElement = document.querySelector(
           `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
         ) as HTMLButtonElement;
@@ -272,6 +286,9 @@ function refreshGrid() {
         currentRefreshCoords[1] === belowCoord[1];
 
       if (isBelowSquare) {
+        if (belowCoord[0] === targetCoords[0] && belowCoord[1] === targetCoords[1])
+          return;
+
         const belowNodeElement = document.querySelector(
           `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
         ) as HTMLButtonElement;
