@@ -50,11 +50,9 @@ while (running) {
 
   nodeElement.addEventListener("click", (e: MouseEvent) => {
     const el = e.target as HTMLButtonElement;
-    const selectedCoords = [parseInt(el.dataset.coordX!), parseInt(el.dataset.coordY!)];
+    selectedCoords = [parseInt(el.dataset.coordX!), parseInt(el.dataset.coordY!)];
 
     if (!selectedCoords[0] || !selectedCoords[1]) {
-      console.log(selectedCoords);
-
       throw new Error("No selected coords found");
     }
 
@@ -66,7 +64,6 @@ while (running) {
       const aboveX = selectedCoords[0];
       const aboveY = selectedCoords[1] - 1;
       aboveCoord = [aboveX, aboveY];
-      console.log("aboveCoord: ", aboveCoord);
     }
 
     if (
@@ -77,7 +74,6 @@ while (running) {
       const belowX = selectedCoords[0];
       const belowY = selectedCoords[1] + 1;
       belowCoord = [belowX, belowY];
-      console.log("belowCoord: ", belowCoord);
     }
 
     if (
@@ -89,7 +85,6 @@ while (running) {
       const leftY = selectedCoords[1];
 
       leftCoord = [leftX, leftY];
-      console.log("leftCoord: ", leftCoord);
     }
 
     if (
@@ -100,7 +95,6 @@ while (running) {
       const rightX = selectedCoords[0] + 1;
       const rightY = selectedCoords[1];
       rightCoord = [rightX, rightY];
-      console.log("rightCoord: ", rightCoord);
     }
 
     if (selectedCoords[0] === targetCoords[0] && selectedCoords[1] === targetCoords[1])
@@ -149,104 +143,54 @@ function refreshGrid() {
       break;
     }
 
-    // if (!selectedCoords[0] || !selectedCoords[1]) {
-    //   console.log(selectedCoords);
-
-    //   throw new Error("No selected coords found");
-    // }
-
-    // // determine surrounding coordinates (above, below, left, right)
-    // if (
-    //   selectedCoords[1] - 1 === currentRefreshCoords[1] - 1 &&
-    //   selectedCoords[0] === currentRefreshCoords[0]
-    // ) {
-    //   const aboveX = currentRefreshCoords[0];
-    //   const aboveY = currentRefreshCoords[1] - 1;
-    //   aboveCoord = [aboveX, aboveY];
-    //   console.log("aboveCoord: ", aboveCoord);
-    // }
-
-    // if (
-    //   // currentRefreshCoords[1] < maxDimensions[1] - 1 &&
-    //   selectedCoords[1] + 1 === currentRefreshCoords[1] + 1 &&
-    //   selectedCoords[0] === currentRefreshCoords[0]
-    // ) {
-    //   const belowX = currentRefreshCoords[0];
-    //   const belowY = currentRefreshCoords[1] + 1;
-    //   belowCoord = [belowX, belowY];
-    //   console.log("belowCoord: ", belowCoord);
-    // }
-
-    // if (
-    //   // currentRefreshCoords[0] > 0 &&
-    //   selectedCoords[0] - 1 === currentRefreshCoords[0] - 1 &&
-    //   selectedCoords[1] === currentRefreshCoords[1]
-    // ) {
-    //   const leftX = currentRefreshCoords[0] - 1;
-    //   const leftY = currentRefreshCoords[1];
-
-    //   leftCoord = [leftX, leftY];
-    //   console.log("leftCoord: ", leftCoord);
-    // }
-
-    // if (
-    //   // currentRefreshCoords[0] < maxDimensions[0] - 1 &&
-    //   selectedCoords[0] + 1 === currentRefreshCoords[0] + 1 &&
-    //   selectedCoords[1] === currentRefreshCoords[1]
-    // ) {
-    //   const rightX = currentRefreshCoords[0] + 1;
-    //   const rightY = currentRefreshCoords[1];
-    //   rightCoord = [rightX, rightY];
-    //   console.log("rightCoord: ", rightCoord);
-    // }
-
     if (surroundingsNeedRefresh) surroundingsNeedRefresh = false;
 
     const isClickedSquare =
       currentRefreshCoords[0] === selectedCoords[0] &&
       currentRefreshCoords[1] === selectedCoords[1];
 
+      console.log("currentRefreshCoords", currentRefreshCoords, "selectedCoords", selectedCoords)
+
     if (isClickedSquare) {
+      console.log("ASDFASDFASDFASDFASDF")
       // determine which closest (on the grid, not numerically)
 
       if (targetCoords[0] === null || !targetCoords[1] === null)
         throw new Error("Missing target coordinates");
 
-      // handle diffs
-      {
-        let leftDiff = [0, 0];
+      let leftDiff = [0, 0];
 
-        if (leftCoord[0] && leftCoord[1]) {
-          if (targetCoords[0] === null || isNaN(targetCoords[1])) {
-            throw new Error("Left target coord missing");
-          }
-          leftDiff = [leftCoord[0] - targetCoords[0], leftCoord[1] - targetCoords[1]];
+      if (leftCoord[0] && leftCoord[1]) {
+        if (targetCoords[0] === null || isNaN(targetCoords[1])) {
+          throw new Error("Left target coord missing");
         }
-        let rightDiff = [0, 0];
-
-        if (rightCoord && rightCoord[0] && rightCoord[1]) {
-          if (targetCoords[0] === null || targetCoords[1] === null) {
-            throw new Error("Right target coord missing");
-          }
-          rightDiff = [rightCoord[0] - targetCoords[0], rightCoord[1] - targetCoords[1]];
-        }
-        let aboveDiff = [0, 0];
-
-        if (aboveCoord && aboveCoord[0] && aboveCoord[1]) {
-          if (targetCoords[0] === null || targetCoords[1] === null) {
-            throw new Error("Above target coord missing");
-          }
-          aboveDiff = [aboveCoord[0] - targetCoords[0], aboveCoord[1] - targetCoords[1]];
-        }
-        let belowDiff = [0, 0];
-
-        if (belowCoord && belowCoord[0] && belowCoord[1]) {
-          if (targetCoords[0] === null || targetCoords[1] === null) {
-            throw new Error("Below target coord missing");
-          }
-          belowDiff = [belowCoord[0] - targetCoords[0], belowCoord[1] - targetCoords[1]];
-        }
+        leftDiff = [leftCoord[0] - targetCoords[0], leftCoord[1] - targetCoords[1]];
       }
+      let rightDiff = [0, 0];
+
+      if (rightCoord && rightCoord[0] && rightCoord[1]) {
+        if (targetCoords[0] === null || targetCoords[1] === null) {
+          throw new Error("Right target coord missing");
+        }
+        rightDiff = [rightCoord[0] - targetCoords[0], rightCoord[1] - targetCoords[1]];
+      }
+      let aboveDiff = [0, 0];
+
+      if (aboveCoord && aboveCoord[0] && aboveCoord[1]) {
+        if (targetCoords[0] === null || targetCoords[1] === null) {
+          throw new Error("Above target coord missing");
+        }
+        aboveDiff = [aboveCoord[0] - targetCoords[0], aboveCoord[1] - targetCoords[1]];
+      }
+      let belowDiff = [0, 0];
+
+      if (belowCoord && belowCoord[0] && belowCoord[1]) {
+        if (targetCoords[0] === null || targetCoords[1] === null) {
+          throw new Error("Below target coord missing");
+        }
+        belowDiff = [belowCoord[0] - targetCoords[0], belowCoord[1] - targetCoords[1]];
+      }
+      console.log("leftDiff", leftDiff, "rightDiff", rightDiff,"aboveDiff", aboveDiff, "belowDiff", belowDiff)
     }
 
     const nodeElement = document.querySelector(
@@ -276,7 +220,6 @@ function refreshGrid() {
         currentRefreshCoords[1] === rightCoord[1];
 
       if (isRightSquare) {
-        console.log("isRightSquare", rightCoord);
 
         const rightNodeElement = document.querySelector(
           `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
@@ -288,21 +231,13 @@ function refreshGrid() {
       }
     }
 
-    console.log(
-      "currCoords",
-      currentRefreshCoords,
-      "leftCoord",
-      leftCoord,
-      "selectedCoord",
-      selectedCoords
-    );
+
     if (leftCoord[0] !== null && leftCoord[1] !== null) {
       const isLeftSquare =
         currentRefreshCoords[0] === leftCoord[0] &&
         currentRefreshCoords[1] === leftCoord[1];
 
       if (isLeftSquare) {
-        console.log("isLeftSquare", leftCoord);
         const leftNodeElement = document.querySelector(
           `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
         ) as HTMLButtonElement;
@@ -321,7 +256,6 @@ function refreshGrid() {
       // console.log("currentRefreshCoords", currentRefreshCoords, "aboveCoord", aboveCoord)
 
       if (isAboveSquare) {
-        console.log("isAboveSquare", aboveCoord);
         const aboveNodeElement = document.querySelector(
           `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
         ) as HTMLButtonElement;
@@ -338,7 +272,6 @@ function refreshGrid() {
         currentRefreshCoords[1] === belowCoord[1];
 
       if (isBelowSquare) {
-        console.log("isBelowSquare", belowCoord);
         const belowNodeElement = document.querySelector(
           `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
         ) as HTMLButtonElement;
@@ -368,6 +301,5 @@ function refreshGrid() {
       currRefreshAxisIndex = 0;
 
     runIndex++;
-    if (runIndex >= 99) console.log("inner loop (refreshGrid()) ran", runIndex);
   }
 }
