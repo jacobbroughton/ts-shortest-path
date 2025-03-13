@@ -1,3 +1,7 @@
+body {
+  background-color: #313131;
+  color: white;
+}
 button {
   position: relative;
   color: white;
