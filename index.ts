@@ -1,11 +1,11 @@
 type Coord = [number, number];
 type CoordOptional = [number | null, number | null];
 
-const maxDimensions: Coord = [10, 10];
+const maxCoord: Coord = [9, 9];
 const currCoords: Coord = [0, 0];
 const targetCoords: Coord = [
-  Math.floor(Math.random() * maxDimensions[0]),
-  Math.floor(Math.random() * maxDimensions[1]),
+  Math.floor(Math.random() * maxCoord[0]),
+  Math.floor(Math.random() * maxCoord[1]),
 ]!;
 let currAxisIndex: 0 | 1 = 0; // 0 = x, 1 = y
 let selectedCoords: CoordOptional = [null, null];
@@ -18,6 +18,11 @@ let needsRefresh = false;
 let surroundingsNeedRefresh = false;
 let runIndex = 0;
 
+let leastDiff: { value: null | number; direction: string } = {
+  value: null,
+  direction: "",
+};
+
 const gridElement = document.querySelector(".grid") as HTMLDivElement;
 gridElement.style.width = "300px";
 gridElement.style.height = "300px";
@@ -27,7 +32,13 @@ gridElement.style.position = "relative";
 // render grid
 while (running) {
   // both limits are reached, exit loop
-  if (currAxisIndex === 1 && currCoords[currAxisIndex] >= maxDimensions[currAxisIndex]) {
+  if (currCoords[0] > maxCoord[0] && currCoords[1] === maxCoord[1]) {
+    running = false;
+    break;
+  }
+
+  // failsafe
+  if (runIndex >= (maxCoord[0] + 1) * (maxCoord[1] + 1)) {
     running = false;
     break;
   }
@@ -110,10 +121,7 @@ while (running) {
   gridElement.append(nodeElement);
 
   // max x reached, focus on y axis and reset x coord to 0
-  if (
-    currAxisIndex === 0 &&
-    currCoords[currAxisIndex] === maxDimensions[currAxisIndex] - 1
-  ) {
+  if (currAxisIndex === 0 && currCoords[0] === maxCoord[0]) {
     currAxisIndex = 1;
     currCoords[0] = 0;
   }
@@ -121,35 +129,39 @@ while (running) {
   // increment coord on current axis
   currCoords[currAxisIndex] += 1;
 
-  if (currCoords[0] === 0 && currCoords[1] < maxDimensions[1]) currAxisIndex = 0;
+  if (currCoords[0] === 0 && currCoords[1] <= maxCoord[1]) {
+    currAxisIndex = 0;
+  }
+
+  runIndex++;
 }
 
 function refreshGrid() {
-  const currentRefreshCoords: [number, number] = [0, 0];
-  let currRefreshAxisIndex: 0 | 1 = 0;
+  const refreshCoord: [number, number] = [0, 0];
+  let refreshAxis: 0 | 1 = 0;
   let runIndex = 0;
-
+  console.log("before while loop");
   while (needsRefresh) {
+    // console.log(refreshCoord);
+    // if (refreshAxis === 1 && refreshCoord[1] >= maxCoord[1]) {
+    //   needsRefresh = false;
+    //   return;
+    // }
+
     if (
-      currRefreshAxisIndex === 1 &&
-      currentRefreshCoords[currRefreshAxisIndex] >= maxDimensions[currRefreshAxisIndex]
+      // runIndex >= maxCoord[0] * maxCoord[1] ||
+      refreshCoord[0] > maxCoord[0] ||
+      refreshCoord[1] > maxCoord[1]
     ) {
       needsRefresh = false;
-      break;
+      console.log("SEE YA", runIndex, refreshCoord, maxCoord)
+      return;
     }
 
     if (surroundingsNeedRefresh) surroundingsNeedRefresh = false;
 
     const isClickedSquare =
-      currentRefreshCoords[0] === selectedCoords[0] &&
-      currentRefreshCoords[1] === selectedCoords[1];
-
-    console.log(
-      "currentRefreshCoords",
-      currentRefreshCoords,
-      "selectedCoords",
-      selectedCoords
-    );
+      refreshCoord[0] === selectedCoords[0] && refreshCoord[1] === selectedCoords[1];
 
     if (isClickedSquare) {
       // determine which closest (on the grid, not numerically)
@@ -189,134 +201,225 @@ function refreshGrid() {
         }
         belowDiff = [belowCoord[0] - targetCoords[0], belowCoord[1] - targetCoords[1]];
       }
-      console.log(
-        "leftDiff",
-        leftDiff,
-        "rightDiff",
-        rightDiff,
-        "aboveDiff",
-        aboveDiff,
-        "belowDiff",
-        belowDiff
+
+      let leftTotalMoves = leftDiff.reduce(
+        (prevValue, currentValue) => (prevValue += Math.abs(currentValue)),
+        0
       );
+
+      let rightTotalMoves = rightDiff.reduce(
+        (prevValue, currentValue) => (prevValue += Math.abs(currentValue)),
+        0
+      );
+      let aboveTotalMoves = aboveDiff.reduce(
+        (prevValue, currentValue) => (prevValue += Math.abs(currentValue)),
+        0
+      );
+      let belowTotalMoves = belowDiff.reduce(
+        (prevValue, currentValue) => (prevValue += Math.abs(currentValue)),
+        0
+      );
+
+      let directionArr = [
+        leftTotalMoves || 0,
+        rightTotalMoves || 0,
+        aboveTotalMoves || 0,
+        belowTotalMoves || 0,
+      ];
+
+      for (let i = 0; i < directionArr.length; i++) {
+        let direction =
+          i === 0
+            ? "left"
+            : i === 1
+            ? "right"
+            : i === 2
+            ? "above"
+            : i === 3
+            ? "below"
+            : "";
+
+        if (leastDiff.value === null) leastDiff = { value: directionArr[i]!, direction };
+        if (leastDiff.value !== null && directionArr[i]! < leastDiff.value) {
+          leastDiff.direction = direction;
+          leastDiff.value = directionArr[i];
+        }
+      }
+
+      // console.log("leftDiff", leftDiff);
+      // console.log("rightDiff", rightDiff);
+      // console.log("aboveDiff", aboveDiff);
+      // console.log("belowDiff", belowDiff);
+      // console.log(leastDiff);
     }
 
     const nodeElement = document.querySelector(
-      `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
+      `[data-coord-x="${refreshCoord[0]}"][data-coord-y="${refreshCoord[1]}"]`
     ) as HTMLButtonElement;
 
+    if (!nodeElement) throw new Error("Node element not found");
+
     if (
-      !(
-        currentRefreshCoords[0] === selectedCoords[0] &&
-        currentRefreshCoords[1] === selectedCoords[1]
-      ) &&
-      !(
-        currentRefreshCoords[0] === targetCoords[0] &&
-        currentRefreshCoords[1] === targetCoords[1]
-      )
+      !(refreshCoord[0] === selectedCoords[0] && refreshCoord[1] === selectedCoords[1]) &&
+      !(refreshCoord[0] === targetCoords[0] && refreshCoord[1] === targetCoords[1])
     ) {
+      // console.log(
+      //   "HERE YE HERE YE",
+      //   "refreshCoord:",
+      //   refreshCoord,
+      //   "selectedCoord: ",
+      //   selectedCoords,
+      //   "targetCoord: ",
+      //   targetCoords
+      // );
+      nodeElement.classList.add("default");
       nodeElement.style.backgroundColor = "green";
       nodeElement.classList.remove("right");
       nodeElement.classList.remove("left");
       nodeElement.classList.remove("above");
       nodeElement.classList.remove("below");
+    } else {
+      // console.log("NOPE", refreshCoord, targetCoords, selectedCoords);
     }
 
     if (rightCoord[0] !== null && rightCoord[1] !== null) {
       const isRightSquare =
-        currentRefreshCoords[0] === rightCoord[0] &&
-        currentRefreshCoords[1] === rightCoord[1];
+        refreshCoord[0] === rightCoord[0] && refreshCoord[1] === rightCoord[1];
 
       if (isRightSquare) {
         if (rightCoord[0] === targetCoords[0] && rightCoord[1] === targetCoords[1])
           return;
 
         const rightNodeElement = document.querySelector(
-          `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
+          `[data-coord-x="${refreshCoord[0]}"][data-coord-y="${refreshCoord[1]}"]`
         ) as HTMLButtonElement;
 
-        rightNodeElement.classList.add("right");
+        if (leastDiff.direction === "right") {
+          rightNodeElement.classList.add("right");
 
-        rightNodeElement.style.backgroundColor = "red";
+          rightNodeElement.style.backgroundColor = "red";
+        }
       }
     }
 
     if (leftCoord[0] !== null && leftCoord[1] !== null) {
       const isLeftSquare =
-        currentRefreshCoords[0] === leftCoord[0] &&
-        currentRefreshCoords[1] === leftCoord[1];
+        refreshCoord[0] === leftCoord[0] && refreshCoord[1] === leftCoord[1];
 
       if (isLeftSquare) {
         if (leftCoord[0] === targetCoords[0] && leftCoord[1] === targetCoords[1]) return;
 
         const leftNodeElement = document.querySelector(
-          `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
+          `[data-coord-x="${refreshCoord[0]}"][data-coord-y="${refreshCoord[1]}"]`
         ) as HTMLButtonElement;
 
-        leftNodeElement.classList.add("left");
+        if (leastDiff.direction === "left") {
+          leftNodeElement.classList.add("left");
 
-        leftNodeElement.style.backgroundColor = "grey";
+          leftNodeElement.style.backgroundColor = "grey";
+        }
       }
     }
 
     if (aboveCoord[0] !== null && aboveCoord[1] !== null) {
       const isAboveSquare =
-        currentRefreshCoords[0] === aboveCoord[0] &&
-        currentRefreshCoords[1] === aboveCoord[1];
+        refreshCoord[0] === aboveCoord[0] && refreshCoord[1] === aboveCoord[1];
 
-      // console.log("currentRefreshCoords", currentRefreshCoords, "aboveCoord", aboveCoord)
+      // console.log("refreshCoord", refreshCoord, "aboveCoord", aboveCoord)
 
       if (isAboveSquare) {
         if (aboveCoord[0] === targetCoords[0] && aboveCoord[1] === targetCoords[1])
           return;
 
         const aboveNodeElement = document.querySelector(
-          `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
+          `[data-coord-x="${refreshCoord[0]}"][data-coord-y="${refreshCoord[1]}"]`
         ) as HTMLButtonElement;
 
-        aboveNodeElement.classList.add("above");
+        if (leastDiff.direction === "above") {
+          aboveNodeElement.classList.add("above");
 
-        aboveNodeElement.style.backgroundColor = "lightblue";
+          aboveNodeElement.style.backgroundColor = "lightblue";
+        }
       }
     }
 
     if (belowCoord[0] !== null && belowCoord[1] !== null) {
       const isBelowSquare =
-        currentRefreshCoords[0] === belowCoord[0] &&
-        currentRefreshCoords[1] === belowCoord[1];
+        refreshCoord[0] === belowCoord[0] && refreshCoord[1] === belowCoord[1];
 
       if (isBelowSquare) {
         if (belowCoord[0] === targetCoords[0] && belowCoord[1] === targetCoords[1])
           return;
 
         const belowNodeElement = document.querySelector(
-          `[data-coord-x="${currentRefreshCoords[0]}"][data-coord-y="${currentRefreshCoords[1]}"]`
+          `[data-coord-x="${refreshCoord[0]}"][data-coord-y="${refreshCoord[1]}"]`
         ) as HTMLButtonElement;
 
-        belowNodeElement.classList.add("below");
-        belowNodeElement.style.backgroundColor = "blue";
+        if (leastDiff.direction === "below") {
+          belowNodeElement.classList.add("below");
+          belowNodeElement.style.backgroundColor = "blue";
+        }
       }
     }
 
-    // if (currentRefreshCoords[0] == aboveCoord[0] && currentRefreshCoords[1] == aboveCoord[1])
-    // console.log(currentRefreshCoords, 'above: ', aboveCoord, "below: ", belowCoord, "left: ", leftCoord, 'right: ', rightCoord);
+    // const endOfX = refreshAxis === 0 && refreshCoord[0] === maxCoord[0];
+    // max x reached, focus on y axis and reset x coord to 0
+    // if (endOfX) {
+    //   refreshAxis = 1;
+    //   // refreshCoord[0] = 0;
+    // } else {
+    //   // increment coord on current axis
+    //   refreshCoord[refreshAxis] += 1;
+    // }
+
+    // if (refreshCoord[0] === 0 && refreshCoord[1] < maxCoord[1]) refreshAxis = 0;
+
+    // if (
+    //   (refreshCoord[0] === maxCoord[0] && refreshCoord[1] === maxCoord[1]) ||
+    //   runIndex === (maxCoord[0] + 1) * (maxCoord[1] + 1)
+    // ) {
+    //   needsRefresh = false;
+    // }
+
+    // new below
+
+    // if (endOfX) refreshAxis = 1;
+
+    // if (
+    //   refreshCoord[0] === maxCoord[0] &&
+    //   refreshAxis === 1 &&
+    //   refreshCoord[1] === maxCoord[1]
+    // ) {
+    //   needsRefresh = false;
+    // }
+
+    // if (refreshCoord)
+
+    // if (refreshCoord[0] > maxCoord[0]) {
+    //   needsRefresh = false;
+    // }
+
+    console.log(refreshAxis, refreshCoord, maxCoord);
+    // // new above
+
+    const endOfX = refreshAxis === 0 && refreshCoord[0] === maxCoord[0];
 
     // max x reached, focus on y axis and reset x coord to 0
-    if (
-      currRefreshAxisIndex === 0 &&
-      currentRefreshCoords[currRefreshAxisIndex] ===
-        maxDimensions[currRefreshAxisIndex] - 1
-    ) {
-      currRefreshAxisIndex = 1;
-      currentRefreshCoords[0] = 0;
+    if (endOfX) {
+      refreshAxis = 1;
+      refreshCoord[0] = 0;
+      refreshCoord[1] += 1;
+    } else {
+      // increment coord on current axis
+      refreshAxis = 0
+      refreshCoord[0] += 1;
     }
 
-    // increment coord on current axis
-    currentRefreshCoords[currRefreshAxisIndex] += 1;
-
-    if (currentRefreshCoords[0] === 0 && currentRefreshCoords[1] < maxDimensions[1])
-      currRefreshAxisIndex = 0;
+    // if (refreshCoord[0] === 0 && refreshCoord[1] <= maxCoord[1]) {
+    //   refreshAxis = 0;
+    // }
 
     runIndex++;
   }
+  console.log(runIndex);
 }
